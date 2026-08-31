@@ -2,6 +2,15 @@ package eventos.rental.models;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
 @Entity
 @Table(name = "movimentacoes")
 public class movimentacao {
@@ -17,10 +26,6 @@ public class movimentacao {
     @JoinColumn
     private Usuario usuario;
 
-    @Enumerated
-    @Column
-    private TipoMovimentacao tipo;
-
     @Column
     private Integer quantidade;
 
@@ -32,12 +37,11 @@ public class movimentacao {
     public movimentacao() {
     }
 
-    public movimentacao(Long id, equipamento equipamento, Usuario usuario, TipoMovimentacao tipo, Integer quantidade,
+    public movimentacao(Long id, equipamento equipamento, Usuario usuario, Integer quantidade,
             LocalDate dataMovimentacao, String observacao) {
         this.id = id;
         this.equipamento = equipamento;
         this.usuario = usuario;
-        this.tipo = tipo;
         this.quantidade = quantidade;
         this.dataMovimentacao = dataMovimentacao;
         this.observacao = observacao;
@@ -65,14 +69,6 @@ public class movimentacao {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
-    }
-
-    public TipoMovimentacao getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(TipoMovimentacao tipo) {
-        this.tipo = tipo;
     }
 
     public Integer getQuantidade() {
