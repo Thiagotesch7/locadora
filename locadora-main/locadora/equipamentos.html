@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RENTAL EVENTOS - Equipamentos</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background: #f4f4f5;
+            margin: 0;
+            padding: 2rem;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        header button {
+            background: none;
+            border: 1px solid #d4d4d8;
+            border-radius: 4px;
+            padding: 0.4rem 0.8rem;
+            cursor: pointer;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 1.5rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            padding: 1.25rem;
+        }
+        .card h2 {
+            margin-top: 0;
+            font-size: 1.05rem;
+        }
+        input, select {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 0.6rem;
+            border: 1px solid #d4d4d8;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button.primario {
+            width: 100%;
+            padding: 0.6rem;
+            background: #18181b;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 0.5rem;
+            border-bottom: 1px solid #ececec;
+            font-size: 0.9rem;
+        }
+        .critico {
+            color: #b91c1c;
+            font-weight: 600;
+        }
+        .mensagem {
+            font-size: 0.85rem;
+            min-height: 1.1rem;
+            margin-bottom: 0.6rem;
+        }
+        .mensagem.erro { color: #b91c1c; }
+        .mensagem.sucesso { color: #15803d; }
+        .acoes button {
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #2563eb;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <strong>RENTAL EVENTOS</strong>
+            <span id="usuarioLogado" style="margin-left: 0.75rem; color: #52525b;"></span>
+        </div>
+        <button id="botaoSair">Sair</button>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>Novo equipamento</h2>
+            <div class="mensagem" id="mensagemForm"></div>
+
+            <form id="formEquipamento">
+                <input type="hidden" id="equipamentoId">
+                <input type="text" id="nome" placeholder="Nome" required>
+                <input type="text" id="marca" placeholder="Marca" required>
+                <input type="text" id="modelo" placeholder="Modelo" required>
+                <input type="number" id="quantidade" placeholder="Quantidade" min="0" value="0">
+                <input type="number" id="estoqueMinimo" placeholder="Estoque mínimo" min="0" value="0">
+                <button type="submit" class="primario">Salvar</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Equipamentos cadastrados</h2>
+            <input type="text" id="busca" placeholder="Pesquisar por nome...">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Marca / Modelo</th>
+                        <th>Qtd.</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabela"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = "http://localhost:8080";
+
+        const usuario = JSON.parse(sessionStorage.getItem("usuario") || "null");
+        if (!usuario) {
+            window.location.href = "index.html";
+        }
+        document.getElementById("usuarioLogado").textContent = usuario ? `Olá, ${usuario.nome}` : "";
+
+        document.getElementById("botaoSair").addEventListener("click", () => {
+            sessionStorage.removeItem("usuario");
+            window.location.href = "index.html";
+        });
+
+        const formEquipamento = document.getElementById("formEquipamento");
+        const mensagemForm = document.getElementById("mensagemForm");
+        const corpoTabela = document.getElementById("corpoTabela");
+        const busca = document.getElementById("busca");
+
+        async function carregarEquipamentos(termo = "") {
+            const url = termo
+                ? `${API_BASE_URL}/api/equipamentos?busca=${encodeURIComponent(termo)}`
+                : `${API_BASE_URL}/api/equipamentos`;
+
+            const resposta = await fetch(url);
+            const equipamentos = await resposta.json();
+
+            corpoTabela.innerHTML = "";
+
+            equipamentos.forEach((equipamento) => {
+                const critico = equipamento.quantidade <= equipamento.estoqueMinimo;
+
+                const linha = document.createElement("tr");
+                linha.innerHTML = `
+                    <td>${equipamento.nome}</td>
+                    <td>${equipamento.marca} / ${equipamento.modelo}</td>
+                    <td class="${critico ? "critico" : ""}">${equipamento.quantidade}</td>
+                    <td class="acoes">
+                        <button data-id="${equipamento.id}" class="editar">Editar</button>
+                        <button data-id="${equipamento.id}" class="excluir">Excluir</button>
+                    </td>
+                `;
+                corpoTabela.appendChild(linha);
+            });
+        }
+
+        corpoTabela.addEventListener("click", async (evento) => {
+            const id = evento.target.dataset.id;
+            if (!id) return;
+
+            if (evento.target.classList.contains("excluir")) {
+                await fetch(`${API_BASE_URL}/api/equipamentos/${id}`, { method: "DELETE" });
+                carregarEquipamentos(busca.value.trim());
+                return;
+            }
+
+            if (evento.target.classList.contains("editar")) {
+                const resposta = await fetch(`${API_BASE_URL}/api/equipamentos/${id}`);
+                const equipamento = await resposta.json();
+
+                document.getElementById("equipamentoId").value = equipamento.id;
+                document.getElementById("nome").value = equipamento.nome;
+                document.getElementById("marca").value = equipamento.marca;
+                document.getElementById("modelo").value = equipamento.modelo;
+                document.getElementById("quantidade").value = equipamento.quantidade;
+                document.getElementById("estoqueMinimo").value = equipamento.estoqueMinimo;
+            }
+        });
+
+        formEquipamento.addEventListener("submit", async (evento) => {
+            evento.preventDefault();
+            mensagemForm.textContent = "";
+            mensagemForm.className = "mensagem";
+
+            const id = document.getElementById("equipamentoId").value;
+
+            const corpo = {
+                nome: document.getElementById("nome").value.trim(),
+                marca: document.getElementById("marca").value.trim(),
+                modelo: document.getElementById("modelo").value.trim(),
+                quantidade: Number(document.getElementById("quantidade").value),
+                estoqueMinimo: Number(document.getElementById("estoqueMinimo").value)
+            };
+
+            try {
+                const resposta = await fetch(
+                    id ? `${API_BASE_URL}/api/equipamentos/${id}` : `${API_BASE_URL}/api/equipamentos`,
+                    {
+                        method: id ? "PUT" : "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(corpo)
+                    }
+                );
+
+                const dados = await resposta.json();
+
+                if (!resposta.ok) {
+                    throw new Error(dados.mensagem || "Não foi possível salvar.");
+                }
+
+                mensagemForm.textContent = "Salvo com sucesso.";
+                mensagemForm.className = "mensagem sucesso";
+                formEquipamento.reset();
+                document.getElementById("equipamentoId").value = "";
+                carregarEquipamentos(busca.value.trim());
+
+            } catch (erro) {
+                mensagemForm.textContent = erro.message;
+                mensagemForm.className = "mensagem erro";
+            }
+        });
+
+        let temporizadorBusca;
+        busca.addEventListener("input", () => {
+            clearTimeout(temporizadorBusca);
+            temporizadorBusca = setTimeout(() => carregarEquipamentos(busca.value.trim()), 300);
+        });
+
+        carregarEquipamentos();
+    </script>
+</body>
+</html>

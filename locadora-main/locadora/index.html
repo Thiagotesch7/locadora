@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RENTAL EVENTOS - Login</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background: #f4f4f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login {
+            background: #fff;
+            padding: 2rem 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 320px;
+        }
+        .login h1 {
+            margin-top: 0;
+            font-size: 1.4rem;
+        }
+        .login input {
+            width: 100%;
+            padding: 0.6rem;
+            margin-bottom: 0.8rem;
+            border: 1px solid #d4d4d8;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .login button {
+            width: 100%;
+            padding: 0.6rem;
+            background: #18181b;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .login button:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+        .erro {
+            color: #b91c1c;
+            font-size: 0.85rem;
+            min-height: 1.1rem;
+            margin-bottom: 0.6rem;
+        }
+    </style>
+</head>
+<body>
+    <form class="login" id="formLogin">
+        <h1>Entrar</h1>
+
+        <div class="erro" id="mensagemErro"></div>
+
+        <input type="email" id="email" placeholder="E-mail" required>
+        <input type="password" id="senha" placeholder="Senha" required>
+
+        <button type="submit" id="botaoEntrar">Entrar</button>
+    </form>
+
+    <script>
+        // Ajuste a URL base se a API estiver em outro host/porta.
+        const API_BASE_URL = "http://localhost:8080";
+
+        const form = document.getElementById("formLogin");
+        const mensagemErro = document.getElementById("mensagemErro");
+        const botaoEntrar = document.getElementById("botaoEntrar");
+
+        form.addEventListener("submit", async (evento) => {
+            evento.preventDefault();
+            mensagemErro.textContent = "";
+            botaoEntrar.disabled = true;
+            botaoEntrar.textContent = "Entrando...";
+
+            const email = document.getElementById("email").value.trim();
+            const senha = document.getElementById("senha").value;
+
+            try {
+                const resposta = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, senha })
+                });
+
+                const dados = await resposta.json();
+
+                if (!resposta.ok) {
+                    throw new Error(dados.mensagem || "Não foi possível entrar.");
+                }
+
+                sessionStorage.setItem("usuario", JSON.stringify(dados));
+                window.location.href = "equipamentos.html";
+
+            } catch (erro) {
+                mensagemErro.textContent = erro.message;
+            } finally {
+                botaoEntrar.disabled = false;
+                botaoEntrar.textContent = "Entrar";
+            }
+        });
+    </script>
+</body>
+</html>
