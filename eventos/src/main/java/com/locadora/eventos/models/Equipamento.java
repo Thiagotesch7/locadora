@@ -1,4 +1,4 @@
-package com.locadora.models;
+package com.locadora.eventos.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,24 +17,24 @@ public class Equipamento {
     private Integer id;
 
     @Column(name = "marca")
-    private Integer marca;
+    private String marca;
 
     @Column(name = "modelo")
-    private Integer modelo;
+    private String modelo;
 
     @Column(name = "categoria")
-    private Integer categoria;
+    private String categoria;
 
     @Column(name = "cor")
-    private Integer cor;
+    private String cor;
 
     @Column(name = "quantidade")
-    private Integer quantidade;
+    private String quantidade;
 
     public Equipamento() {
     }
 
-    public Equipamento(Integer id, Integer marca, Integer modelo, Integer categoria, Integer cor, Integer quantidade) {
+    public Equipamento(Integer id, String marca, String modelo, String categoria, String cor, String quantidade) {
         this.id = id;
         this.marca = marca;
         this.modelo = modelo;
@@ -51,44 +51,45 @@ public class Equipamento {
         this.id = id;
     }
 
-    public Integer getMarca() {
+    public String getMarca() {
         return marca;
     }
 
-    public void setMarca(Integer marca) {
+    public void setMarca(String marca) {
         this.marca = marca;
     }
 
-    public Integer getModelo() {
+    public String getModelo() {
         return modelo;
     }
 
-    public void setModelo(Integer modelo) {
+    public void setModelo(String modelo) {
         this.modelo = modelo;
     }
 
-    public Integer getCategoria() {
+    public String getCategoria() {
         return categoria;
     }
 
-    public void setCategoria(Integer categoria) {
+    public void setCategoria(String categoria) {
         this.categoria = categoria;
     }
 
-    public Integer getCor() {
+    public String getCor() {
         return cor;
     }
 
-    public void setCor(Integer cor) {
+    public void setCor(String cor) {
         this.cor = cor;
     }
 
-    public Integer getQuantidade() {
+    public String getQuantidade() {
         return quantidade;
     }
 
-    public void setQuantidade(Integer quantidade) {
+    public void setQuantidade(String quantidade) {
         this.quantidade = quantidade;
     }
 
+    
 }

@@ -20,7 +20,7 @@
     <description>Sistema de locadora de equipamentos</description>
 
     <properties>
-        <java.version>25</java.version>
+        <java.version>23</java.version>
     </properties>
 
     <dependencies>
@@ -63,6 +63,12 @@
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
             <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>3.1.1</version>
         </dependency>
 
         <!-- Testes -->
